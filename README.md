@@ -2,6 +2,9 @@ This is a command which prints the Tox ID for the current user, or for a specifi
 
 To compile this you will first need to install toxcore (https://github.com/irungentoo/toxcore)
 
+    make
+    sudo make install
+
 To print your own ID:
 
     toxid
