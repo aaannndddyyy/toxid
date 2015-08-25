@@ -9,56 +9,54 @@ fi
 if [ ! -d /etc/avahi ]; then
     exit 0
 fi
-  
+
 TEMPFILE=/tmp/toxavahi.txt
 avahi-browse -atr | grep " Tox\|address =\|port =\|txt =" > $TEMPFILE
 if [ ! -f $TEMPFILE ]; then
     exit 1
 fi
-  
+
 state=0
-while IFS='' read -r line || [[ -n \"$line\" ]]; do
+address=""
+port=0
+peer=""
+while IFS='' read -r line || [[ -n "$line" ]]; do
     if [ ${state} -eq "3" ]; then
         if [[ $line == *"txt ="* ]]; then
+            id=$(echo $line | awk -F '"' '{print $2}')
             if [ ! $PEERNAME ]; then
-                echo -n " "
+                echo "$address $port $id"
+            else
+                echo "$address"
             fi
-            echo $line | awk -F '"' '{print $2}'
             state=0
         fi
     fi
     if [ ${state} -eq "2" ]; then
         if [[ $line == *"port ="* ]]; then
             if [ ! $PEERNAME ]; then
-                echo -n " "
-                echo -n $line | awk -F '[' '{print $2}' | awk -F ']' '{print $1}'
+                port=$(echo $line | awk -F '[' '{print $2}' | awk -F ']' '{print $1}')
             fi
             state=3
         fi
     fi
     if [ ${state} -eq "1" ]; then
-        if [ $PEERNAME ]; then
-            if [[ $line == *"hostname ="* ]]; then
-                CURR_PEERNAME=$(echo -n $line | awk -F '[' '{print $2}' | awk -F ']' '{print $1}')
-                if [[ $CURR_PEERNAME != "${PEERNAME}.local" ]]; then
-                    state=0
-                fi
+        if [[ $line == *"hostname ="* && $PEERNAME ]]; then
+            peer=$(echo $line | awk -F '[' '{print $2}' | awk -F ']' '{print $1}')
+            if [[ $peer != "${PEERNAME}.local" ]]; then
+                state=0
             fi
         fi
         if [[ $line == *"address ="* ]]; then
-            if [ ! $PEERNAME ]; then
-                echo -n $line | awk -F '[' '{print $2}' | awk -F ']' '{print $1}'
-            fi
+            address=$(echo $line | awk -F '[' '{print $2}' | awk -F ']' '{print $1}')
             state=2
         fi
     fi
-    if [ ${state} -eq "0" ]; then
-        if [[ $line == *" Tox"* ]]; then
-            state=1
-        fi
+    if [[ $line == *" Tox"* && $line == *"= "* ]]; then
+        state=1
     fi
-done < "$TEMPFILE"  
-  
+done < "$TEMPFILE"
+
 rm -f $TEMPFILE
-  
+
 exit 0
