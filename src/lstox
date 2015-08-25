@@ -11,7 +11,7 @@ if [ ! -d /etc/avahi ]; then
 fi
 
 TEMPFILE=/tmp/toxavahi.txt
-avahi-browse -atr | grep " Tox\|address =\|port =\|txt =" > $TEMPFILE
+avahi-browse -atrl | grep " Tox\|address =\|port =\|txt =" > $TEMPFILE
 if [ ! -f $TEMPFILE ]; then
     exit 1
 fi
