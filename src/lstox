@@ -33,7 +33,7 @@ while IFS='' read -r line || [[ -n "$line" ]]; do
                     echo "$address $port $id"
                 else
                     if [[ $FORMAT == 'tox-bootstrapd' || $FORMAT == 'bootstrapd' ]]; then
-                        echo '{'
+                        echo "{ // $peer"
                         echo "  address = \"$address\""
                         echo "  port = $port"
                         echo "  public_key = \"$id\""
