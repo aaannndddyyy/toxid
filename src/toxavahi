@@ -18,10 +18,11 @@ TOX_ID=$(toxid -u $MY_USERNAME)
 echo '<?xml version="1.0" standalone="no"?><!--*-nxml-*-->' > /etc/avahi/services/tox.service
 echo '<!DOCTYPE service-group SYSTEM "avahi-service.dtd">' >> /etc/avahi/services/tox.service
 echo '<service-group>' >> /etc/avahi/services/tox.service
-echo "  <name replace-wildcards='yes'>%h $TOX_ID</name>" >> /etc/avahi/services/tox.service
+echo "  <name replace-wildcards='yes'>%h Tox</name>" >> /etc/avahi/services/tox.service
 echo '  <service>' >> /etc/avahi/services/tox.service
 echo '    <type>_tox._tcp</type>' >> /etc/avahi/services/tox.service
 echo "    <port>$TOX_PORT</port>" >> /etc/avahi/services/tox.service
+echo "    <txt-record>$TOX_ID</txt-record>" >> /etc/avahi/services/tox.service
 echo '  </service>' >> /etc/avahi/services/tox.service
 echo '</service-group>' >> /etc/avahi/services/tox.service
 
