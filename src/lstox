@@ -11,7 +11,7 @@ if [ ! -d /etc/avahi ]; then
 fi
 
 TEMPFILE=/tmp/toxavahi.txt
-avahi-browse -atrl | grep " Tox\|address =\|port =\|txt =" > $TEMPFILE
+avahi-browse -atrl | grep " Tox\|hostname =\|address =\|port =\|txt =" > $TEMPFILE
 if [ ! -f $TEMPFILE ]; then
     exit 1
 fi
@@ -21,34 +21,34 @@ address=""
 port=0
 peer=""
 while IFS='' read -r line || [[ -n "$line" ]]; do
-    if [ ${state} -eq "3" ]; then
+    if [ ${state} -eq "4" ]; then
         if [[ $line == *"txt ="* ]]; then
             id=$(echo $line | awk -F '"' '{print $2}')
             if [ ! $PEERNAME ]; then
-                echo "$address $port $id"
+                echo "$peer $port $id"
             else
-                echo "$id"
+                if [[ $peer == ${PEERNAME} ]]; then
+                    echo "$id"
+                fi
             fi
             state=0
         fi
     fi
-    if [ ${state} -eq "2" ]; then
+    if [ ${state} -eq "3" ]; then
         if [[ $line == *"port ="* ]]; then
-            if [ ! $PEERNAME ]; then
-                port=$(echo $line | awk -F '[' '{print $2}' | awk -F ']' '{print $1}')
-            fi
+            port=$(echo $line | awk -F '[' '{print $2}' | awk -F ']' '{print $1}')
+            state=4
+        fi
+    fi
+    if [ ${state} -eq "2" ]; then
+        if [[ $line == *"address ="* ]]; then
+            address=$(echo $line | awk -F '[' '{print $2}' | awk -F ']' '{print $1}')
             state=3
         fi
     fi
     if [ ${state} -eq "1" ]; then
-        if [[ $line == *"hostname ="* && $PEERNAME ]]; then
+        if [[ $line == *"hostname ="* ]]; then
             peer=$(echo $line | awk -F '[' '{print $2}' | awk -F ']' '{print $1}')
-            if [[ $peer != "${PEERNAME}.local" ]]; then
-                state=0
-            fi
-        fi
-        if [[ $line == *"address ="* ]]; then
-            address=$(echo $line | awk -F '[' '{print $2}' | awk -F ']' '{print $1}')
             state=2
         fi
     fi
