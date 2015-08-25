@@ -3,11 +3,11 @@
 FORMAT=
 PEERNAME=
 if [ $1 ]; then
-    # show the Tox ID for a specific peer
-    PEERNAME=$1
+    FORMAT=$1
 fi
 if [ $2 ]; then
-    FORMAT=$2
+    # show the Tox ID for a specific peer
+    PEERNAME=$2
 fi
 
 if [ ! -d /etc/avahi ]; then
