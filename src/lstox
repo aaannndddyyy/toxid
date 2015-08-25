@@ -1,0 +1,64 @@
+#!/bin/bash
+
+PEERNAME=
+if [ $1 ]; then
+    # show the Tox ID for a specific peer
+    PEERNAME=$1
+fi
+
+if [ ! -d /etc/avahi ]; then
+    exit 0
+fi
+  
+TEMPFILE=/tmp/toxavahi.txt
+avahi-browse -atr | grep " Tox\|address =\|port =\|txt =" > $TEMPFILE
+if [ ! -f $TEMPFILE ]; then
+    exit 1
+fi
+  
+state=0
+while IFS='' read -r line || [[ -n \"$line\" ]]; do
+    if [ ${state} -eq "3" ]; then
+        if [[ $line == *"txt ="* ]]; then
+            if [ ! $PEERNAME ]; then
+                echo -n " "
+            fi
+            echo $line | awk -F '"' '{print $2}'
+            state=0
+        fi
+    fi
+    if [ ${state} -eq "2" ]; then
+        if [[ $line == *"port ="* ]]; then
+            if [ ! $PEERNAME ]; then
+                echo -n " "
+                echo -n $line | awk -F '[' '{print $2}' | awk -F ']' '{print $1}'
+            fi
+            state=3
+        fi
+    fi
+    if [ ${state} -eq "1" ]; then
+        if [ $PEERNAME ]; then
+            if [[ $line == *"hostname ="* ]]; then
+                CURR_PEERNAME=$(echo -n $line | awk -F '[' '{print $2}' | awk -F ']' '{print $1}')
+                if [[ $CURR_PEERNAME != "${PEERNAME}.local" ]]; then
+                    state=0
+                fi
+            fi
+        fi
+        if [[ $line == *"address ="* ]]; then
+            if [ ! $PEERNAME ]; then
+                echo -n $line | awk -F '[' '{print $2}' | awk -F ']' '{print $1}'
+            fi
+            state=2
+        fi
+    fi
+    if [ ${state} -eq "0" ]; then
+        if [[ $line == *" Tox"* ]]; then
+            state=1
+        fi
+    fi
+done < "$TEMPFILE"  
+  
+rm -f $TEMPFILE
+  
+exit 0

@@ -1,0 +1,32 @@
+#!/bin/bash
+
+TOX_PORT=33445
+DHTNODES=/usr/local/share/toxic/DHTnodes
+
+MY_USERNAME=$USER
+if [ $1 ]; then
+    MY_USERNAME=$1
+fi
+
+DATA_FILE=/home/$MY_USERNAME/.config/tox/data
+if [ ! -f $DATA_FILE ]; then
+    exit 0
+fi
+
+TOX_ID=$(toxid -u $MY_USERNAME)
+
+echo '<?xml version="1.0" standalone="no"?><!--*-nxml-*-->' > /etc/avahi/services/tox.service
+echo '<!DOCTYPE service-group SYSTEM "avahi-service.dtd">' >> /etc/avahi/services/tox.service
+echo '<service-group>' >> /etc/avahi/services/tox.service
+echo "  <name replace-wildcards='yes'>%h $TOX_ID</name>" >> /etc/avahi/services/tox.service
+echo '  <service>' >> /etc/avahi/services/tox.service
+echo '    <type>_tox._tcp</type>' >> /etc/avahi/services/tox.service
+echo "    <port>$TOX_PORT</port>" >> /etc/avahi/services/tox.service
+echo '  </service>' >> /etc/avahi/services/tox.service
+echo '</service-group>' >> /etc/avahi/services/tox.service
+
+if [ -f $DHTNODES ]; then
+    lstox > $DHTNODES
+fi
+
+exit 0

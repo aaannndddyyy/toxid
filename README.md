@@ -12,3 +12,11 @@ To print your own ID:
 or for a given user:
 
     toxid -u [username]
+
+To advertise your Tox ID via an Avahi service
+
+    sudo toxavahi [username]
+
+Then on another system on the same network to discover Tox IDs:
+
+    lstox
