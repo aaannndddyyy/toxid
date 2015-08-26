@@ -2,6 +2,7 @@
 
 TOX_PORT=33445
 DHTNODES=/usr/local/share/toxic/DHTnodes
+TOX_BOOTSTRAP_ID_FILE=/var/lib/tox-bootstrapd/pubkey.txt
 
 MY_USERNAME=$USER
 if [ $1 ]; then
@@ -18,7 +19,7 @@ TOX_ID=$(toxid -u $MY_USERNAME)
 echo '<?xml version="1.0" standalone="no"?><!--*-nxml-*-->' > /etc/avahi/services/tox.service
 echo '<!DOCTYPE service-group SYSTEM "avahi-service.dtd">' >> /etc/avahi/services/tox.service
 echo '<service-group>' >> /etc/avahi/services/tox.service
-echo "  <name replace-wildcards='yes'>%h Tox</name>" >> /etc/avahi/services/tox.service
+echo "  <name replace-wildcards='yes'>%h Tox User</name>" >> /etc/avahi/services/tox.service
 echo '  <service>' >> /etc/avahi/services/tox.service
 echo '    <type>_tox._tcp</type>' >> /etc/avahi/services/tox.service
 echo "    <port>$TOX_PORT</port>" >> /etc/avahi/services/tox.service
@@ -26,8 +27,24 @@ echo "    <txt-record>$TOX_ID</txt-record>" >> /etc/avahi/services/tox.service
 echo '  </service>' >> /etc/avahi/services/tox.service
 echo '</service-group>' >> /etc/avahi/services/tox.service
 
+if [ -f $TOX_BOOTSTRAP_ID_FILE ]; then
+    TOX_BOOTSTRAP_ID=$(cat $TOX_BOOTSTRAP_ID_FILE)
+    if [ ${#TOX_BOOTSTRAP_ID} -gt 30 ]; then
+        echo '<?xml version="1.0" standalone="no"?><!--*-nxml-*-->' > /etc/avahi/services/tox-bootstrap.service
+        echo '<!DOCTYPE service-group SYSTEM "avahi-service.dtd">' >> /etc/avahi/services/tox-bootstrap.service
+        echo '<service-group>' >> /etc/avahi/services/tox-bootstrap.service
+        echo "  <name replace-wildcards='yes'>%h Tox Bootstrap</name>" >> /etc/avahi/services/tox-bootstrap.service
+        echo '  <service>' >> /etc/avahi/services/tox-bootstrap.service
+        echo '    <type>_tox._tcp</type>' >> /etc/avahi/services/tox-bootstrap.service
+        echo "    <port>$TOX_PORT</port>" >> /etc/avahi/services/tox-bootstrap.service
+        echo "    <txt-record>$TOX_BOOTSTRAP_ID</txt-record>" >> /etc/avahi/services/tox-bootstrap.service
+        echo '  </service>' >> /etc/avahi/services/tox-bootstrap.service
+        echo '</service-group>' >> /etc/avahi/services/tox-bootstrap.service
+    fi
+fi
+
 if [ -f $DHTNODES ]; then
-    lstox > $DHTNODES
+    lstox -f dht > $DHTNODES
 fi
 
 exit 0

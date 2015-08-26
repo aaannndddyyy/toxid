@@ -1,21 +1,49 @@
 #!/bin/bash
 
-FORMAT=
+FORMAT='user'
 PEERNAME=
-if [ $1 ]; then
-    FORMAT=$1
-fi
-if [ $2 ]; then
-    # show the Tox ID for a specific peer
-    PEERNAME=$2
-fi
+
+function show_help {
+    echo ''
+    echo 'lstox -f [user/dht/bootstrapd/toxic] -p [peer name]'
+    echo ''
+    exit 0
+}
+
+while [[ $# > 1 ]]
+do
+key="$1"
+
+case $key in
+    -h|--help)
+    show_help
+    ;;
+    -p|--peer)
+    shift
+    PEERNAME="$1"
+    ;;
+    -f|--format)
+    shift
+    FORMAT="$1"
+    ;;
+    *)
+    # unknown option
+    ;;
+esac
+shift
+done
 
 if [ ! -d /etc/avahi ]; then
+    echo 'Avahi is not installed'
     exit 0
 fi
 
 TEMPFILE=/tmp/toxavahi.txt
-avahi-browse -atrl | grep " Tox\|hostname =\|address =\|port =\|txt =" > $TEMPFILE
+if [[ $FORMAT == 'user' ]]; then
+    avahi-browse -atrl | grep " Tox User\|hostname =\|address =\|port =\|txt =" > $TEMPFILE
+else
+    avahi-browse -atr | grep " Tox Bootstrap\|hostname =\|address =\|port =\|txt =" > $TEMPFILE
+fi
 if [ ! -f $TEMPFILE ]; then
     exit 1
 fi
@@ -39,7 +67,11 @@ while IFS='' read -r line || [[ -n "$line" ]]; do
                         echo "  public_key = \"$id\""
                         echo '},'
                     else
-                        echo "$peer $id"
+                        if [[ $FORMAT == 'toxic' ]]; then
+                            echo "/connect $peer $port $id"
+                        else
+                            echo "$peer $id"
+                        fi
                     fi
                 fi
             else
@@ -68,7 +100,7 @@ while IFS='' read -r line || [[ -n "$line" ]]; do
             state=2
         fi
     fi
-    if [[ $line == *" Tox"* && $line == *"= "* ]]; then
+    if [[ $line == *" Tox "* && $line == *"= "* ]]; then
         state=1
     fi
 done < "$TEMPFILE"
