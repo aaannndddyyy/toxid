@@ -124,7 +124,7 @@ while IFS='' read -r line || [[ -n "$line" ]]; do
     fi
     if [[ $line == *" Tox "* && $line == *"= "* ]]; then
         toxuser=
-        if [[ $line == *" Tox User:"* ]]; then
+        if [[ $line == *" Tox User "* ]]; then
             toxuser=$(echo $line | awk -F '(' '{print $2}' | awk -F ')' '{print $1}')
         fi
         state=1
