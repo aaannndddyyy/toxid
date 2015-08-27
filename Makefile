@@ -14,6 +14,7 @@ install:
 	mkdir -p ${DESTDIR}/usr
 	mkdir -p ${DESTDIR}${PREFIX}/bin
 	install -m 755 src/lstox ${DESTDIR}${PREFIX}/bin
+	install -m 755 src/lspeers ${DESTDIR}${PREFIX}/bin
 	install -m 755 src/toxavahi ${DESTDIR}${PREFIX}/bin
 	install -m 755 -s ${APP} ${DESTDIR}${PREFIX}/bin
 	mkdir -m 755 -p ${DESTDIR}${PREFIX}/share/man/man1
@@ -23,6 +24,7 @@ uninstall:
 	rm -f ${DESTDIR}${PREFIX}/share/man/man1/${APP}.1.gz
 	rm -f ${DESTDIR}${PREFIX}/bin/${APP}
 	rm -f ${DESTDIR}${PREFIX}/bin/lstox
+	rm -f ${DESTDIR}${PREFIX}/bin/lspeers
 	rm -f ${DESTDIR}${PREFIX}/bin/toxavahi
 
 clean:

@@ -1,31 +1,53 @@
 #!/bin/bash
+# Copyright (C) 2015
+# Bob Mottram <bob@robotucs.uk.to>
+#
+# This script publishes tox user IDs to the local network
+# via Avahi. It could be regularly called from cron
+#
+# For example:
+#     echo "* *       * * *   root    toxavahi > /dev/null" >> /etc/crontab
+#
+# toxbot is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# toxbot is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with toxbot. If not, see <http://www.gnu.org/licenses/>.
 
 TOX_PORT=33445
 DHTNODES=/usr/local/share/toxic/DHTnodes
 TOX_BOOTSTRAP_ID_FILE=/var/lib/tox-bootstrapd/pubkey.txt
 
-MY_USERNAME=$USER
-if [ $1 ]; then
-    MY_USERNAME=$1
-fi
+for userdir in /home/*/; do
 
-DATA_FILE=/home/$MY_USERNAME/.config/tox/data
-if [ ! -f $DATA_FILE ]; then
-    exit 0
-fi
+    MY_USERNAME=$(echo $userdir | awk -F '/' '{print $3}')
 
-TOX_ID=$(toxid -u $MY_USERNAME)
+    DATA_FILE=/home/$MY_USERNAME/.config/tox/data
+    if [ ! -f $DATA_FILE ]; then
+        continue
+    fi
 
-echo '<?xml version="1.0" standalone="no"?><!--*-nxml-*-->' > /etc/avahi/services/tox.service
-echo '<!DOCTYPE service-group SYSTEM "avahi-service.dtd">' >> /etc/avahi/services/tox.service
-echo '<service-group>' >> /etc/avahi/services/tox.service
-echo "  <name replace-wildcards='yes'>%h Tox User</name>" >> /etc/avahi/services/tox.service
-echo '  <service>' >> /etc/avahi/services/tox.service
-echo '    <type>_tox._tcp</type>' >> /etc/avahi/services/tox.service
-echo "    <port>$TOX_PORT</port>" >> /etc/avahi/services/tox.service
-echo "    <txt-record>$TOX_ID</txt-record>" >> /etc/avahi/services/tox.service
-echo '  </service>' >> /etc/avahi/services/tox.service
-echo '</service-group>' >> /etc/avahi/services/tox.service
+    TOX_ID=$(toxid -u $MY_USERNAME)
+
+    echo '<?xml version="1.0" standalone="no"?><!--*-nxml-*-->' > /etc/avahi/services/tox-${MY_USERNAME}.service
+    echo '<!DOCTYPE service-group SYSTEM "avahi-service.dtd">' >> /etc/avahi/services/tox-${MY_USERNAME}.service
+    echo '<service-group>' >> /etc/avahi/services/tox-${MY_USERNAME}.service
+    echo "  <name replace-wildcards='yes'>%h Tox User ($MY_USERNAME)</name>" >> /etc/avahi/services/tox-${MY_USERNAME}.service
+    echo '  <service>' >> /etc/avahi/services/tox-${MY_USERNAME}.service
+    echo '    <type>_tox._tcp</type>' >> /etc/avahi/services/tox-${MY_USERNAME}.service
+    echo "    <port>$TOX_PORT</port>" >> /etc/avahi/services/tox-${MY_USERNAME}.service
+    echo "    <txt-record>$TOX_ID</txt-record>" >> /etc/avahi/services/tox-${MY_USERNAME}.service
+    echo '  </service>' >> /etc/avahi/services/tox-${MY_USERNAME}.service
+    echo '</service-group>' >> /etc/avahi/services/tox-${MY_USERNAME}.service
+
+done
 
 if [ -f $TOX_BOOTSTRAP_ID_FILE ]; then
     TOX_BOOTSTRAP_ID=$(cat $TOX_BOOTSTRAP_ID_FILE)
