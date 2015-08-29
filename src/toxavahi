@@ -23,7 +23,7 @@
 
 TOX_PORT=33445
 DHTNODES=/usr/local/share/toxic/DHTnodes
-QTOX_INI=.config/tox/qtox.ini
+QTOX_INI='.config/tox/qtox.ini'
 TOX_BOOTSTRAP_ID_FILE=/var/lib/tox-bootstrapd/pubkey.txt
 
 for userdir in /home/*/; do
