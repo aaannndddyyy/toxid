@@ -146,7 +146,7 @@ if [[ $FORMAT == 'qtox' ]]; then
     if [ ${dhtctr} -ne "1" ]; then
         dhtctr=$((dhtctr - 1))
         echo "dhtServerList\size=${dhtctr}"
-        echo 'useCustomList=false'
+        echo 'useCustomList=true'
     fi
 fi
 

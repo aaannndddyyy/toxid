@@ -23,15 +23,53 @@
 
 TOX_PORT=33445
 DHTNODES=/usr/local/share/toxic/DHTnodes
+QTOX_INI=.config/tox/qtox.ini
 TOX_BOOTSTRAP_ID_FILE=/var/lib/tox-bootstrapd/pubkey.txt
 
 for userdir in /home/*/; do
 
     MY_USERNAME=$(echo $userdir | awk -F '/' '{print $3}')
 
+    # is there a tox configuration for this user?
     DATA_FILE=/home/$MY_USERNAME/.config/tox/data
     if [ ! -f $DATA_FILE ]; then
         continue
+    fi
+
+    if [ -f /home/$MY_USERNAME/$QTOX_INI ]; then
+        # keep a copy of the original settings
+        if [ ! -f /home/$MY_USERNAME/$QTOX_INI.internet ]; then
+            cp /home/$MY_USERNAME/$QTOX_INI /home/$MY_USERNAME/$QTOX_INI.internet
+        fi
+        if [ -f /home/$MY_USERNAME/$QTOX_INI.new ]; then
+            rm /home/$MY_USERNAME/$QTOX_INI.new
+        fi
+        # get tox nodes from avahi
+        nodeslist=$(lstox -f qtox)
+        if [ $(echo $nodeslist | wc -l) -eq "0" ]; then
+            # if there are no avahi nodes
+            cp /home/$MY_USERNAME/$QTOX_INI.internet /home/$MY_USERNAME/$QTOX_INI
+        else
+            # update the list with tox nodes from avahi
+            writeline="yes"
+            while IFS='' read -r line || [[ -n "$line" ]]; do
+                if [[ $writeline == "yes" ]];
+                   echo $line >> /home/$MY_USERNAME/$QTOX_INI.new
+                   if [[ $line == "[DHT"* ]]; then
+                       writeline="no"
+                       echo $nodeslist >> /home/$MY_USERNAME/$QTOX_INI.new
+                       echo '' >> /home/$MY_USERNAME/$QTOX_INI.new
+                   fi
+                else
+                    if [[ $line == "["* ]]; then
+                        writeline="yes"
+                        echo $line >> /home/$MY_USERNAME/$QTOX_INI.new
+                    fi
+                fi
+            done < "/home/$MY_USERNAME/$QTOX_INI.internet"
+            cp -f /home/$MY_USERNAME/$QTOX_INI.new /home/$MY_USERNAME/$QTOX_INI
+            rm /home/$MY_USERNAME/$QTOX_INI.new
+        fi
     fi
 
     TOX_ID=$(toxid -u $MY_USERNAME)
