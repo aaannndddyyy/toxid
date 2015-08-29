@@ -5,19 +5,18 @@
  * A command to print your tox ID to the console
  * Some functions are from ToxBot https://github.com/JFreegman/ToxBot
  *
- * toxbot is free software: you can redistribute it and/or modify
+ * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * toxbot is distributed in the hope that it will be useful,
+ * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with toxbot. If not, see <http://www.gnu.org/licenses/>.
- *
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include <tox/tox.h>
@@ -83,7 +82,7 @@ int main(int argc, char* argv[])
     /* get the user's home directory */
 	struct passwd *pw = getpwuid(getuid());
 	const char *homedir =  pw->pw_dir;
-	
+
     /* default location of the tox data file */
     sprintf(data_file, "%s/.config/tox/data", homedir);
 
@@ -94,11 +93,11 @@ int main(int argc, char* argv[])
             sprintf(data_file, "/home/%s/.config/tox/data", argv[i+1]);
         }
     }
-        
+
     /* some default options */
     memset(&tox_opts, 0, sizeof(struct Tox_Options));
     tox_options_default(&tox_opts);
-    
+
     /* load */
     tox = load_tox(&tox_opts, data_file);
     if (tox == NULL) {
@@ -116,6 +115,6 @@ int main(int argc, char* argv[])
 
     /* exit */
     tox_kill(tox);
-    
+
     return 0;
 }
