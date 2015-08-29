@@ -40,6 +40,7 @@ for userdir in /home/*/; do
         # keep a copy of the original settings
         if [ ! -f /home/$MY_USERNAME/$QTOX_INI.internet ]; then
             cp /home/$MY_USERNAME/$QTOX_INI /home/$MY_USERNAME/$QTOX_INI.internet
+            chown $MY_USERNAME:$MY_USERNAME /home/$MY_USERNAME/$QTOX_INI.internet
         fi
         if [ -f /home/$MY_USERNAME/$QTOX_INI.new ]; then
             rm /home/$MY_USERNAME/$QTOX_INI.new
@@ -53,7 +54,7 @@ for userdir in /home/*/; do
             # update the list with tox nodes from avahi
             writeline="yes"
             while IFS='' read -r line || [[ -n "$line" ]]; do
-                if [[ $writeline == "yes" ]];
+                if [[ $writeline == "yes" ]]; then
                    echo $line >> /home/$MY_USERNAME/$QTOX_INI.new
                    if [[ $line == "[DHT"* ]]; then
                        writeline="no"
@@ -68,6 +69,7 @@ for userdir in /home/*/; do
                 fi
             done < "/home/$MY_USERNAME/$QTOX_INI.internet"
             cp -f /home/$MY_USERNAME/$QTOX_INI.new /home/$MY_USERNAME/$QTOX_INI
+            chown $MY_USERNAME:$MY_USERNAME /home/$MY_USERNAME/$QTOX_INI
             rm /home/$MY_USERNAME/$QTOX_INI.new
         fi
     fi
