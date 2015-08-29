@@ -47,7 +47,8 @@ for userdir in /home/*/; do
         fi
         # get tox nodes from avahi
         nodeslist=$(lstox -f qtox)
-        if [ $(echo $nodeslist | wc -l) -eq "0" ]; then
+		nodeslistlines=$(echo "$nodeslist" | wc -l)
+        if [ $nodeslistlines -lt "2" ]; then
             # if there are no avahi nodes
             cp /home/$MY_USERNAME/$QTOX_INI.internet /home/$MY_USERNAME/$QTOX_INI
         else
@@ -58,7 +59,7 @@ for userdir in /home/*/; do
                    echo $line >> /home/$MY_USERNAME/$QTOX_INI.new
                    if [[ $line == "[DHT"* ]]; then
                        writeline="no"
-                       echo $nodeslist >> /home/$MY_USERNAME/$QTOX_INI.new
+                       echo "$nodeslist" >> /home/$MY_USERNAME/$QTOX_INI.new
                        echo '' >> /home/$MY_USERNAME/$QTOX_INI.new
                    fi
                 else
