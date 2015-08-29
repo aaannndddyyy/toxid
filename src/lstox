@@ -23,7 +23,7 @@ PEERNAME=
 
 function show_help {
     echo ''
-    echo 'lstox -f [user/dht/bootstrapd/toxic] -p [peer name]'
+    echo 'lstox -f [user/dht/bootstrapd/toxic/qtox] -p [peer name]'
     echo ''
     exit 0
 }
@@ -70,6 +70,7 @@ state=0
 address=""
 port=0
 peer=""
+dhtctr=1
 while IFS='' read -r line || [[ -n "$line" ]]; do
     if [ ${state} -eq "4" ]; then
         if [[ $line == *"txt ="* ]]; then
@@ -91,7 +92,15 @@ while IFS='' read -r line || [[ -n "$line" ]]; do
                             if [ $toxuser ]; then
                                 echo "$peer $toxuser $id"
                             else
-                                echo "$peer $id"
+                                if [[ $FORMAT == 'qtox' ]]; then
+                                    echo "dhtServerList\\${dhtctr}\\address=$address"
+                                    echo "dhtServerList\\${dhtctr}\\name=$peer"
+                                    echo "dhtServerList\\${dhtctr}\\port=$port"
+                                    echo "dhtServerList\\${dhtctr}\\userId=$id"
+                                    dhtctr=$((dhtctr + 1))
+                                else
+                                    echo "$peer $id"
+                                fi
                             fi
                         fi
                     fi
@@ -132,5 +141,13 @@ while IFS='' read -r line || [[ -n "$line" ]]; do
 done < "$TEMPFILE"
 
 rm -f $TEMPFILE
+
+if [[ $FORMAT == 'qtox' ]]; then
+    if [ ${dhtctr} -ne "1" ]; then
+        dhtctr=$((dhtctr - 1))
+        echo "dhtServerList\size=${dhtctr}"
+        echo 'useCustomList=false'
+    fi
+fi
 
 exit 0
